@@ -31,8 +31,8 @@ fi
 if [ ! -d .git ]; then
   echo "==> Initialising repository"
   git init -q
-  git branch -M main
 fi
+git branch -M main
 
 echo "==> Committing"
 git add -A
@@ -44,14 +44,23 @@ fi
 
 if gh repo view "$SLUG" >/dev/null 2>&1; then
   echo "==> Repo $SLUG already exists"
-  git remote get-url origin >/dev/null 2>&1 \
-    || git remote add origin "https://github.com/$SLUG.git"
-  git push -u origin main
 else
   echo "==> Creating $SLUG"
   # --public is required: GitHub Pages on a private repo needs a paid plan.
-  gh repo create "$SLUG" --public --source=. --remote=origin --push
+  # Created bare, then wired up below, so a half-finished earlier run can't
+  # leave an "origin" behind that makes --remote=origin fail.
+  gh repo create "$SLUG" --public
 fi
+
+echo "==> Pointing origin at $SLUG"
+if git remote get-url origin >/dev/null 2>&1; then
+  git remote set-url origin "https://github.com/$SLUG.git"
+else
+  git remote add origin "https://github.com/$SLUG.git"
+fi
+
+echo "==> Pushing"
+git push -u origin main
 
 echo "==> Pointing Pages at GitHub Actions"
 # Create the Pages site, or switch an existing one to the workflow build type.
@@ -60,7 +69,8 @@ gh api -X POST "repos/$SLUG/pages" -f build_type=workflow >/dev/null 2>&1 \
 
 echo "==> Waiting for the deploy"
 sleep 5
-gh run watch --exit-status "$(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')" || true
+RUN_ID="$(gh run list -R "$SLUG" --limit 1 --json databaseId --jq '.[0].databaseId')"
+[ -n "$RUN_ID" ] && gh run watch -R "$SLUG" --exit-status "$RUN_ID" || true
 
 echo
 echo "Live at: https://$OWNER.github.io/$REPO/"
