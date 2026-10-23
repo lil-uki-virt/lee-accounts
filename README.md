@@ -34,10 +34,18 @@ From this folder:
 bash deploy.sh
 ```
 
-The first run creates `Mr-Kevin-Lee/lee-accounts`, pushes, and points Pages at Actions.
-Re-run it any time to publish changes. It needs `gh` installed and authenticated.
+The first run creates `lil-uki-virt/lee-accounts`, pushes, and points Pages at Actions.
+Re-run it any time to publish changes. It needs `gh` installed and authenticated as an
+account with write access to `lil-uki-virt`.
 
-The site ends up at https://Mr-Kevin-Lee.github.io/lee-accounts/
+The site ends up at https://lil-uki-virt.github.io/lee-accounts/
+
+The owner determines the hostname — `https://<owner>.github.io/<repo>/` — so to publish
+under a different account, either edit `OWNER` in `deploy.sh` or run:
+
+```bash
+GH_OWNER=some-other-account bash deploy.sh
+```
 
 **Note:** the repo has to be public, because GitHub Pages on a private repo requires a
 paid plan. That means the kids' first names are on a public URL — unlisted and

@@ -10,7 +10,9 @@
 #
 set -euo pipefail
 
-OWNER="Mr-Kevin-Lee"
+# The owner decides the Pages hostname: https://<owner>.github.io/<repo>/
+# Override with GH_OWNER=someone-else bash deploy.sh
+OWNER="${GH_OWNER:-lil-uki-virt}"
 REPO="${1:-lee-accounts}"
 SLUG="$OWNER/$REPO"
 
